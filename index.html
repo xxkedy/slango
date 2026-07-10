@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>WORDPLAY</title>
+<meta name="theme-color" content="#0b1210" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&display=swap');
+:root{
+  --bg:#0b1210; --panel:#111b18; --panel2:#0e1714; --line:#1d2b27;
+  --ink:#e8f2ee; --muted:#7d938c;
+  --cyan:#22d3ee; --green:#4ade80; --amber:#fbbf24; --red:#f87171;
+  --disp:'Big Shoulders Display',-apple-system,'Hiragino Sans',sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);
+  padding:calc(14px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+  max-width:520px;margin:0 auto;font-size:15px;line-height:1.55}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.screen{display:none}.screen.on{display:block}
+/* ---------- HOME ---------- */
+.logo{font-family:var(--disp);font-weight:900;font-size:44px;letter-spacing:.5px;line-height:1;
+  color:var(--ink)}
+.logo b{color:var(--cyan)}
+.tag{color:var(--muted);font-size:12px;margin-top:4px;letter-spacing:.4px}
+.stats{display:flex;gap:10px;margin:16px 0 18px}
+.stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat .n{font-family:var(--disp);font-weight:900;font-size:26px;color:var(--green);line-height:1.1}
+.stat .l{font-size:11px;color:var(--muted);letter-spacing:.5px}
+.review{width:100%;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#2a1c05,#181005);
+  border:1px solid #4a3410;border-radius:14px;padding:14px;margin-bottom:20px;text-align:left}
+.review .fire{font-size:26px}
+.review .rt{font-weight:800;color:var(--amber);font-size:15px}
+.review .rs{font-size:12px;color:#c9a24d}
+.review .cnt{margin-left:auto;font-family:var(--disp);font-weight:900;font-size:30px;color:var(--amber)}
+.review[disabled]{opacity:.4}
+.sec{font-size:11px;color:var(--muted);letter-spacing:2px;margin:0 0 8px 2px}
+.track{width:100%;display:flex;align-items:center;gap:12px;background:var(--panel);
+  border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:9px;text-align:left;
+  transition:transform .08s}
+.track:active{transform:scale(.985)}
+.track .no{font-family:var(--disp);font-weight:900;font-size:22px;color:var(--cyan);width:34px;flex:none}
+.track .tt{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:.5px;line-height:1.1}
+.track .ts{font-size:11.5px;color:var(--muted);margin-top:2px}
+.track .st{margin-left:auto;font-size:15px;flex:none}
+.track.lock{opacity:.38}
+.track.clear{border-color:#1f4630}
+.track.clear .no{color:var(--green)}
+.foot{text-align:center;color:var(--muted);font-size:11px;margin-top:18px}
+/* ---------- QUIZ ---------- */
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.qhead .back{color:var(--muted);font-size:13px;padding:6px 8px 6px 0}
+.qhead .mode{font-family:var(--disp);font-weight:700;font-size:16px;letter-spacing:1px}
+.qhead .mode.rev{color:var(--amber)}
+.dots{display:flex;gap:5px;margin-left:auto}
+.dot{width:9px;height:9px;border-radius:50%;background:#22322d}
+.dot.ok{background:var(--green)}.dot.ng{background:var(--red)}.dot.now{background:var(--cyan)}
+.word{font-family:var(--disp);font-weight:900;font-size:52px;line-height:1;letter-spacing:.5px;
+  margin:22px 0 4px;word-break:break-word}
+.wq{color:var(--muted);font-size:13px;margin-bottom:16px}
+.choices{display:grid;gap:9px}
+.ch{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px 14px;
+  text-align:left;font-size:15px;color:var(--ink);transition:transform .08s}
+.ch:active{transform:scale(.985)}
+.ch.ok{background:#0d2417;border-color:var(--green);color:#c9f5d9}
+.ch.ng{background:#2a1212;border-color:var(--red);color:#ffd3d3}
+.ch.dim{opacity:.45}
+/* signature: BAR card (歌詞ディグ風の一節) */
+.bar{display:none;margin-top:16px;background:var(--panel2);border-left:4px solid var(--cyan);
+  border-radius:0 13px 13px 0;padding:13px 14px}
+.bar.on{display:block;animation:up .25s ease-out}
+.bar .bl{font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:6px}
+.bar .bx{font-size:16px;line-height:1.6;font-style:italic;color:#d7e6e1}
+.bar .bx mark{background:none;color:var(--cyan);font-weight:800;font-style:normal}
+.bar .bm{margin-top:8px;font-size:13.5px;color:var(--green);font-weight:700}
+.bar .miss{margin-top:6px;font-size:11.5px;color:var(--amber)}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.bar.on{animation:none}}
+.next{display:none;width:100%;margin-top:14px;background:linear-gradient(180deg,var(--cyan),#0bb6d4);
+  color:#02272e;font-weight:900;font-size:16px;padding:15px;border-radius:13px}
+.next.on{display:block}
+/* ---------- RESULT ---------- */
+.rwrap{text-align:center;padding-top:34px}
+.rnum{font-family:var(--disp);font-weight:900;font-size:88px;line-height:1;color:var(--cyan)}
+.rnum small{font-size:30px;color:var(--muted)}
+.rmsg{font-size:17px;font-weight:800;margin:12px 0 4px}
+.rmsg.clear{color:var(--green)}
+.rsub{color:var(--muted);font-size:13px}
+.rbtns{display:grid;gap:10px;margin-top:26px}
+.rb{padding:14px;border-radius:13px;font-weight:800;font-size:15px}
+.rb.p{background:linear-gradient(180deg,var(--green),#2fc665);color:#03260f}
+.rb.s{background:var(--panel);border:1px solid var(--line);color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ===== HOME ===== -->
+<section class="screen on" id="home">
+  <h1 class="logo">WORD<b>PLAY</b></h1>
+  <p class="tag">HIP-HOPスラング100語 · mikan式 4択ドリル</p>
+  <div class="stats">
+    <div class="stat"><div class="n" id="stTotal">0</div><div class="l">通算正解</div></div>
+    <div class="stat"><div class="n" id="stRate">–</div><div class="l">正答率</div></div>
+    <div class="stat"><div class="n" id="stClear">0<span style="font-size:14px;color:var(--muted)">/5</span></div><div class="l">クリア</div></div>
+  </div>
+  <button class="review" id="reviewBtn">
+    <span class="fire">&#128293;</span>
+    <span><span class="rt">復習デッキ</span><br><span class="rs">ミスった語。正解したら消える</span></span>
+    <span class="cnt" id="deckCnt">0</span>
+  </button>
+  <p class="sec">TRACKLIST — 8/10でクリア→次が解放</p>
+  <div id="tracks"></div>
+  <p class="foot">記録は端末に保存 · 例文は全てオリジナル</p>
+</section>
+
+<!-- ===== QUIZ ===== -->
+<section class="screen" id="quiz">
+  <div class="qhead">
+    <button class="back" id="backBtn">&larr; やめる</button>
+    <span class="mode" id="qMode"></span>
+    <div class="dots" id="dots"></div>
+  </div>
+  <div class="word" id="qWord"></div>
+  <p class="wq">この意味は？</p>
+  <div class="choices" id="choices"></div>
+  <div class="bar" id="bar">
+    <div class="bl">&#127908; BAR — こう使う</div>
+    <div class="bx" id="barEx"></div>
+    <div class="bm" id="barM"></div>
+    <div class="miss" id="barMiss"></div>
+  </div>
+  <button class="next" id="nextBtn">NEXT &rarr;</button>
+</section>
+
+<!-- ===== RESULT ===== -->
+<section class="screen" id="result">
+  <div class="rwrap">
+    <div class="rnum"><span id="rScore">0</span><small id="rOf">/10</small></div>
+    <p class="rmsg" id="rMsg"></p>
+    <p class="rsub" id="rSub"></p>
+    <div class="rbtns">
+      <button class="rb p" id="rAgain"></button>
+      <button class="rb s" id="rHome">ホームへ</button>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ================= DATA : 100語 {w,m,ex,lv} ================= */
+var WORDS=[
+/* ---- L1 STARTER ---- */
+{w:"cap",m:"嘘・盛った話",ex:"They say they grind all night, that's cap, I seen them sleep.",lv:1},
+{w:"drip",m:"イケてる服装・スタイル",ex:"Stepped in the booth and the drip did the talking first.",lv:1},
+{w:"flex",m:"見せびらかす・自慢する",ex:"I don't flex the watch, I flex the hours that it took.",lv:1},
+{w:"lit",m:"最高に盛り上がってる",ex:"The show got lit the second the 808 dropped.",lv:1},
+{w:"fam",m:"家族同然の仲間",ex:"Money come and go, but fam stay on the guest list.",lv:1},
+{w:"bet",m:"了解・任せろ",ex:"You want the hook by Friday? Bet, consider it done.",lv:1},
+{w:"salty",m:"不機嫌・僻んでる",ex:"He's salty 'cause my demo played before his did.",lv:1},
+{w:"ghost",m:"急に連絡を絶つ",ex:"Fake friends ghost you the week the numbers drop.",lv:1},
+{w:"vibe",m:"雰囲気・ノリ",ex:"Kill the lights, keep the vibe, let the chords breathe.",lv:1},
+{w:"hype",m:"盛り上げ・期待感",ex:"Don't believe the hype, believe the playback count.",lv:1},
+{w:"clout",m:"影響力・注目",ex:"Chasing clout is a loan you pay back with your soul.",lv:1},
+{w:"savage",m:"容赦ない・ヤバい",ex:"That verse was savage, no names but everybody knew.",lv:1},
+{w:"lowkey",m:"ひそかに・控えめに",ex:"Lowkey I mixed that whole tape in my bedroom.",lv:1},
+{w:"highkey",m:"あからさまに・マジで",ex:"Highkey this beat is the best thing I made all year.",lv:1},
+{w:"slaps",m:"（曲が）最高にいい",ex:"Play it in the whip once — if it slaps, it ships.",lv:1},
+{w:"fire",m:"最高・ヤバい",ex:"The rough mix was already fire before mastering.",lv:1},
+{w:"GOAT",m:"史上最高（Greatest Of All Time）",ex:"Every GOAT was once a rookie nobody replied to.",lv:1},
+{w:"mid",m:"凡庸・イマイチ",ex:"I'd rather drop nothing than drop something mid.",lv:1},
+{w:"sus",m:"怪しい",ex:"A deal with no paperwork? That's sus, walk away.",lv:1},
+{w:"shade",m:"遠回しの悪口",ex:"She threw shade in the interview, I threw a hit back.",lv:1},
+/* ---- L2 LYRIC BASICS ---- */
+{w:"hustle",m:"稼ぐために動き回る・商売",ex:"Day job by nine, hustle after midnight, same me.",lv:2},
+{w:"loyalty",m:"忠誠・義理",ex:"Loyalty is quiet — it shows up, it don't post up.",lv:2},
+{w:"legacy",m:"遺産・後世に残すもの",ex:"I'm not chasing charts, I'm building a legacy in wav files.",lv:2},
+{w:"grind",m:"地道な努力・下積み仕事",ex:"The grind don't clap for you, it just opens the door.",lv:2},
+{w:"struggle",m:"苦闘・下積み",ex:"Every struggle I survived became a sixteen later.",lv:2},
+{w:"blessing",m:"恵み・ありがたいこと",ex:"Count the blessing twice before you count the money.",lv:2},
+{w:"betray",m:"裏切る",ex:"Numbers never betray you the way people can.",lv:2},
+{w:"ambition",m:"野心",ex:"Ambition kept me up when the heater gave up.",lv:2},
+{w:"sacrifice",m:"犠牲・犠牲にする",ex:"Every late night was a sacrifice the morning never saw.",lv:2},
+{w:"redemption",m:"名誉挽回・救い",ex:"This album is my redemption for the years I stayed quiet.",lv:2},
+{w:"envy",m:"妬み",ex:"Envy is just applause that came out wrong.",lv:2},
+{w:"pride",m:"誇り",ex:"I swallowed my pride and learned the parts I faked.",lv:2},
+{w:"fate",m:"運命",ex:"Fate dealt the cards, but I still chose the table.",lv:2},
+{w:"witness",m:"目撃する・証人",ex:"The city was a witness to every hour I put in.",lv:2},
+{w:"vision",m:"先を見る力・構想",ex:"They laughed at the vision, now they ask for the link.",lv:2},
+{w:"wisdom",m:"知恵",ex:"Scars turn to wisdom if you read them right.",lv:2},
+{w:"foundation",m:"土台",ex:"Family is the foundation, the rest is decoration.",lv:2},
+{w:"elevate",m:"高める・引き上げる",ex:"Change the room if the room won't elevate you.",lv:2},
+{w:"overcome",m:"乗り越える",ex:"What I overcome in silence, I perform out loud.",lv:2},
+{w:"humble",m:"謙虚な",ex:"Stay humble in the win, stay hungry in the loss.",lv:2},
+/* ---- L3 STREET TALK ---- */
+{w:"opp",m:"敵対する相手",ex:"An opp will study your moves harder than a fan does.",lv:3},
+{w:"racks",m:"大金・札束",ex:"Stacked the racks slow, no shortcut, all receipts.",lv:3},
+{w:"snitch",m:"密告者・チクる",ex:"A snitch tells the story wrong to save his own page.",lv:3},
+{w:"plug",m:"何でも手に入る卸元・コネ",ex:"My plug for inspiration is a crate of old records.",lv:3},
+{w:"trap",m:"ハスリングの拠点→音楽ジャンル",ex:"Turned the trap tempo into a lullaby for the block.",lv:3},
+{w:"whip",m:"車",ex:"Old whip, new dreams — the demo on repeat inside.",lv:3},
+{w:"block",m:"地元の一角・シマ",ex:"The block remembers who you were before the bio.",lv:3},
+{w:"heat",m:"銃→転じて注目・ヤバいもの",ex:"I only carry heat in the folder — unreleased files.",lv:3},
+{w:"stacks",m:"札束",ex:"Stacks don't make you right, they just make you loud.",lv:3},
+{w:"bands",m:"帯付きの札束",ex:"Bands can't buy back the years, so spend them wise.",lv:3},
+{w:"guap",m:"大金",ex:"Real guap is quiet money with a paper trail.",lv:3},
+{w:"beef",m:"揉め事・因縁",ex:"Beef is free promo for whoever raps it better.",lv:3},
+{w:"strapped",m:"武装してる→備えてる",ex:"I stay strapped with knowledge, that's the only heat I need.",lv:3},
+{w:"twelve",m:"警察（12）",ex:"Twelve rolled by slow, the whole block turned to statues.",lv:3},
+{w:"feds",m:"連邦捜査官→警察",ex:"Move clean — the feds read timelines too.",lv:3},
+{w:"homie",m:"地元の仲間",ex:"A real homie corrects you before the crowd can.",lv:3},
+{w:"crib",m:"家",ex:"Studio in the crib, so the commute is ten steps.",lv:3},
+{w:"gang",m:"仲間・一味",ex:"Gang means the ones who pulled up before it paid.",lv:3},
+{w:"smoke",m:"揉め事・やり合う気",ex:"If you want smoke, bring bars, not screenshots.",lv:3},
+{w:"static",m:"トラブル・悶着",ex:"No static in my circle, we settle it in the booth.",lv:3},
+/* ---- L4 NEW WAVE ---- */
+{w:"rizz",m:"口説きの上手さ・魅力",ex:"His rizz is just eye contact and a good playlist.",lv:4},
+{w:"bussin",m:"めちゃくちゃ美味い・最高",ex:"Post-workout ramen at 1 a.m.? Bussin, no debate.",lv:4},
+{w:"goated",m:"GOAT級にすごい",ex:"That engineer is goated — one pass and the vocal sat.",lv:4},
+{w:"sheesh",m:"うわヤバ（感嘆）",ex:"Sheesh, that bassline just rearranged the room.",lv:4},
+{w:"delulu",m:"妄想が過ぎる",ex:"Call me delulu, the plan still says stadium.",lv:4},
+{w:"cooking",m:"いい仕事してる・仕込み中",ex:"Leave him alone, he's cooking — that's beat number nine.",lv:4},
+{w:"aura",m:"オーラ・格",ex:"He lost all his aura the second he read the comments.",lv:4},
+{w:"ate",m:"完璧にやり切った",ex:"She ate that hook and left no crumbs on the mic.",lv:4},
+{w:"slay",m:"完璧にキメる",ex:"New fit, new single, same mission — slay quietly.",lv:4},
+{w:"based",m:"周りを気にせず自分を貫いてる",ex:"Based move: he deleted the trend and dropped jazz chords.",lv:4},
+{w:"cringe",m:"見てて痛い",ex:"Forced slang in a verse is cringe — let it come natural.",lv:4},
+{w:"ratio",m:"反論の方が伸びて論破される",ex:"He dissed the classic and got ratio'd by sunrise.",lv:4},
+{w:"glaze",m:"過剰に持ち上げる",ex:"Don't glaze me, tell me which bar was weak.",lv:4},
+{w:"yap",m:"ダラダラ喋りすぎる",ex:"Less yap, more takes — the session clock is running.",lv:4},
+{w:"NPC",m:"自分の意見がないモブ的な人",ex:"Don't move like an NPC, write your own dialogue.",lv:4},
+{w:"sigma",m:"群れない一匹狼（ネタ含み）",ex:"Sigma grindset, he says, reheating day-three rice.",lv:4},
+{w:"brainrot",m:"ネット見過ぎで脳が溶けた状態",ex:"Cured my brainrot with a walk and one good album.",lv:4},
+{w:"W",m:"勝ち・良いこと",ex:"Small W today: finished the mix before midnight.",lv:4},
+{w:"L",m:"負け・残念なこと",ex:"Took the L on stage once — best teacher I ever had.",lv:4},
+{w:"touch grass",m:"外に出ろ・現実に戻れ",ex:"Arguing with strangers at 3 a.m.? Go touch grass.",lv:4},
+/* ---- L5 PHRASES ---- */
+{w:"no cap",m:"マジで・嘘抜きで",ex:"No cap, I made that beat on a phone in the break room.",lv:5},
+{w:"out the mud",m:"どん底から這い上がって",ex:"Came out the mud with a laptop and a borrowed mic.",lv:5},
+{w:"stand on business",m:"有言実行する・筋を通す",ex:"Said I'd drop in June — I stand on business, it's out.",lv:5},
+{w:"on God",m:"神に誓って・ガチで",ex:"On God, I never wrote a line I didn't live.",lv:5},
+{w:"run it up",m:"数字・金を積み上げる",ex:"Quietly run it up, loudly give it back.",lv:5},
+{w:"day ones",m:"最初からいる仲間",ex:"Front row is reserved for the day ones, always.",lv:5},
+{w:"off the rip",m:"のっけから・即",ex:"Off the rip, the intro tells you who I am.",lv:5},
+{w:"in my bag",m:"集中して稼ぎ／創作モードに入ってる",ex:"Don't text me this weekend, I'm in my bag.",lv:5},
+{w:"keep it a buck",m:"正直に言う",ex:"Keep it a buck — the second verse needs a rewrite.",lv:5},
+{w:"all gas no brakes",m:"全力で突き進む・ブレーキなし",ex:"This year is all gas no brakes, ten beats a month.",lv:5},
+{w:"ten toes down",m:"ブレずに忠実でいる",ex:"Ten toes down for the team, even when the room is empty.",lv:5},
+{w:"from the jump",m:"最初から",ex:"She believed from the jump, before the first play.",lv:5},
+{w:"on sight",m:"見かけたら即（やり合う）",ex:"Old me wanted it on sight — new me sends an invoice.",lv:5},
+{w:"came from nothing",m:"ゼロから成り上がった",ex:"We came from nothing, so everything feels like extra.",lv:5},
+{w:"sky's the limit",m:"可能性は無限大",ex:"They gave me a ceiling, I said sky's the limit.",lv:5},
+{w:"real recognize real",m:"本物は本物を見抜く",ex:"Real recognize real — the nod said more than the review.",lv:5},
+{w:"get the bag",m:"金を稼ぐ",ex:"Get the bag, then get the point of the bag.",lv:5},
+{w:"move in silence",m:"黙って動く・成果で語る",ex:"Move in silence, let the release date make the noise.",lv:5},
+{w:"put on for my city",m:"地元を背負って活躍する",ex:"Every stage I touch, I put on for my city first.",lv:5},
+{w:"stay dangerous",m:"気を抜かず尖ったままでいろ",ex:"Get comfortable with work, never with praise — stay dangerous.",lv:5}
+];
+var LEVELS=[
+ {no:"01",en:"STARTER",jp:"基本スラング"},
+ {no:"02",en:"LYRIC BASICS",jp:"リリック基礎語（TOEICにも効く）"},
+ {no:"03",en:"STREET TALK",jp:"ストリート語"},
+ {no:"04",en:"NEW WAVE",jp:"最新スラング"},
+ {no:"05",en:"PHRASES",jp:"決めフレーズ"}
+];
+/* ================= STATE ================= */
+var KEY='wordplay_v1';
+var S={cleared:[false,false,false,false,false],deck:[],tot:{a:0,c:0}};
+function load(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&d.cleared){S=d}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function $(id){return document.getElementById(id)}
+function show(id){['home','quiz','result'].forEach(function(s){$(s).classList.toggle('on',s===id)});window.scrollTo(0,0)}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function unlocked(lv){return lv===1||S.cleared[lv-2]}
+/* ================= HOME ================= */
+function renderHome(){
+  $('stTotal').textContent=S.tot.c;
+  $('stRate').textContent=S.tot.a?Math.round(S.tot.c/S.tot.a*100)+'%':'–';
+  var cl=S.cleared.filter(Boolean).length;
+  $('stClear').innerHTML=cl+'<span style="font-size:14px;color:var(--muted)">/5</span>';
+  $('deckCnt').textContent=S.deck.length;
+  $('reviewBtn').disabled=S.deck.length===0;
+  var h='';
+  LEVELS.forEach(function(L,i){
+    var lv=i+1,un=unlocked(lv),cl2=S.cleared[i];
+    h+='<button class="track'+(un?'':' lock')+(cl2?' clear':'')+'" data-lv="'+lv+'" '+(un?'':'disabled')+'>'
+      +'<span class="no">'+L.no+'</span>'
+      +'<span><span class="tt">'+L.en+'</span><br><span class="ts">'+L.jp+' · 20語</span></span>'
+      +'<span class="st">'+(cl2?'✅':(un?'▶':'🔒'))+'</span></button>';
+  });
+  $('tracks').innerHTML=h;
+  Array.prototype.forEach.call(document.querySelectorAll('.track'),function(b){
+    b.addEventListener('click',function(){startLevel(parseInt(b.dataset.lv,10))});
+  });
+}
+/* ================= QUIZ ================= */
+var Q={mode:'level',lv:1,list:[],i:0,score:0};
+function startLevel(lv){
+  Q={mode:'level',lv:lv,list:shuffle(WORDS.filter(function(w){return w.lv===lv})).slice(0,10),i:0,score:0};
+  $('qMode').textContent='TRACK '+LEVELS[lv-1].no+' · '+LEVELS[lv-1].en;
+  $('qMode').className='mode';
+  show('quiz');next();
+}
+function startReview(){
+  if(!S.deck.length)return;
+  var pool=WORDS.filter(function(w){return S.deck.indexOf(w.w)>=0});
+  Q={mode:'review',lv:0,list:shuffle(pool.slice()).slice(0,10),i:0,score:0};
+  $('qMode').textContent='🔥 REVIEW';
+  $('qMode').className='mode rev';
+  show('quiz');next();
+}
+function dots(){
+  var h='';
+  for(var k=0;k<Q.list.length;k++){
+    var c='dot';
+    if(Q.res&&k<Q.res.length)c+=Q.res[k]?' ok':' ng';
+    else if(k===Q.i)c+=' now';
+    h+='<span class="'+c+'"></span>';
+  }
+  $('dots').innerHTML=h;
+}
+function next(){
+  if(!Q.res)Q.res=[];
+  if(Q.i>=Q.list.length){finish();return}
+  var w=Q.list[Q.i];
+  dots();
+  $('qWord').textContent=w.w;
+  $('bar').classList.remove('on');
+  $('nextBtn').classList.remove('on');
+  var others=shuffle(WORDS.filter(function(x){return x.w!==w.w&&x.lv===w.lv}).map(function(x){return x.m}));
+  if(others.length<3)others=others.concat(shuffle(WORDS.filter(function(x){return x.w!==w.w}).map(function(x){return x.m})));
+  var opts=shuffle([w.m,others[0],others[1],others[2]]);
+  var h='';
+  opts.forEach(function(o){h+='<button class="ch">'+o+'</button>'});
+  $('choices').innerHTML=h;
+  Array.prototype.forEach.call(document.querySelectorAll('.ch'),function(b){
+    b.addEventListener('click',function(){answer(b,w)});
+  });
+}
+function answer(btn,w){
+  var right=btn.textContent===w.m;
+  Array.prototype.forEach.call(document.querySelectorAll('.ch'),function(b){
+    b.disabled=true;
+    if(b.textContent===w.m)b.classList.add('ok');
+    else if(b===btn)b.classList.add('ng');
+    else b.classList.add('dim');
+  });
+  Q.res.push(right);
+  S.tot.a++;
+  if(right){
+    Q.score++;S.tot.c++;
+    if(Q.mode==='review'){var ix=S.deck.indexOf(w.w);if(ix>=0)S.deck.splice(ix,1)}
+  }else{
+    if(S.deck.indexOf(w.w)<0)S.deck.push(w.w);
+  }
+  save();dots();
+  /* BAR card */
+  var esc=w.w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  var re=new RegExp('('+esc+')','i');
+  $('barEx').innerHTML=w.ex.replace(re,'<mark>$1</mark>');
+  $('barM').textContent=w.w+' ＝ '+w.m;
+  $('barMiss').textContent=right?'':(Q.mode==='review'?'🔥 まだデッキに残る':'🔥 復習デッキに追加した');
+  $('bar').classList.add('on');
+  $('nextBtn').classList.add('on');
+}
+$('nextBtn').addEventListener('click',function(){Q.i++;next()});
+$('backBtn').addEventListener('click',function(){renderHome();show('home')});
+/* ================= RESULT ================= */
+function finish(){
+  var n=Q.list.length;
+  $('rScore').textContent=Q.score;
+  $('rOf').textContent='/'+n;
+  if(Q.mode==='level'){
+    var cleared=Q.score>=8;
+    if(cleared&&!S.cleared[Q.lv-1]){S.cleared[Q.lv-1]=true;save()}
+    $('rMsg').textContent=cleared?'CLEAR!':'あと少し';
+    $('rMsg').className='rmsg'+(cleared?' clear':'');
+    $('rSub').textContent=cleared
+      ?(Q.lv<5?'TRACK '+LEVELS[Q.lv].no+'「'+LEVELS[Q.lv].en+'」が解放された':'全トラック制覇。あとは復習デッキを空にするだけ')
+      :'8問正解でクリア。ミスは🔥復習デッキに入っとる';
+    $('rAgain').textContent='もう一回';
+    $('rAgain').onclick=function(){startLevel(Q.lv)};
+  }else{
+    $('rMsg').textContent=S.deck.length===0?'デッキ空！':'消し込み中';
+    $('rMsg').className='rmsg'+(S.deck.length===0?' clear':'');
+    $('rSub').textContent='残り '+S.deck.length+' 語';
+    $('rAgain').textContent=S.deck.length?'続けて復習':'ホームへ';
+    $('rAgain').onclick=function(){S.deck.length?startReview():(renderHome(),show('home'))};
+  }
+  show('result');
+}
+$('rHome').addEventListener('click',function(){renderHome();show('home')});
+$('reviewBtn').addEventListener('click',startReview);
+/* ================= INIT ================= */
+load();renderHome();
+</script>
+</body>
+</html>
