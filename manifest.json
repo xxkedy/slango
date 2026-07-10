@@ -1,10 +1,10 @@
 {
-  "name": "WORDPLAY",
-  "short_name": "WORDPLAY",
+  "name": "BAR EXAM",
+  "short_name": "BAR EXAM",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#0b1210",
-  "theme_color": "#0b1210",
+  "background_color": "#0d0d0f",
+  "theme_color": "#0d0d0f",
   "icons": [
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
