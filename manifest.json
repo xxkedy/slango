@@ -1,6 +1,6 @@
 {
-  "name": "BAR EXAM",
-  "short_name": "BAR EXAM",
+  "name": "Slango",
+  "short_name": "Slango",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0d0d0f",
